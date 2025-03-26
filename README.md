@@ -36,7 +36,7 @@ pip install nonebot-plugin-error-manager
 ```
 
 ```bash
-nb plugin install nonebot-plugin-error-manager
+nb plugin install nonebot_plugin_error_manager
 ```
 
 ## 🎮 使用方法
