@@ -35,6 +35,10 @@ _✨ 智能记录并可视化机器人运行时的错误信息 ✨_
 pip install nonebot-plugin-error-manager
 ```
 
+```bash
+nb plugin install nonebot-plugin-error-manager
+```
+
 ## 🎮 使用方法
 
 ### 配置详情
