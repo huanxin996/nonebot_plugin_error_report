@@ -37,6 +37,11 @@ pip install nonebot-plugin-error-manager
 
 ## 🎮 使用方法
 
+### 配置详情
+
+- error_image_quality - 错误图片绘制质量，默认为 30
+- error_image_font - 错误图片字体，默认为 "Source Han Sans CN"
+
 ### 基础命令
 
 - `/错误管理 查看 [页数]` - 分页查看错误记录
@@ -58,7 +63,7 @@ pip install nonebot-plugin-error-manager
 
 ## 📸 效果展示
 
-<img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/such.jpg" alt="示例图片">
+<img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/such.png" alt="示例图片">
 
 ## 🙏 鸣谢
 
