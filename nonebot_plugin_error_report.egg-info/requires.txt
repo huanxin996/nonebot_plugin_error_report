@@ -1,0 +1,4 @@
+nonebot_plugin_alconna<=0.56.2
+nonebot_plugin_tortoise_orm<=0.1.4
+nonebot_plugin_userinfo<=0.2.6
+pillow<=11.1.0

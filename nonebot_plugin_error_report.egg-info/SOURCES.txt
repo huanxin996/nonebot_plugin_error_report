@@ -1,0 +1,12 @@
+LICENSE
+README.md
+setup.py
+nonebot_plugin_error_report/__init__.py
+nonebot_plugin_error_report/config.py
+nonebot_plugin_error_report/model.py
+nonebot_plugin_error_report/toimg.py
+nonebot_plugin_error_report.egg-info/PKG-INFO
+nonebot_plugin_error_report.egg-info/SOURCES.txt
+nonebot_plugin_error_report.egg-info/dependency_links.txt
+nonebot_plugin_error_report.egg-info/requires.txt
+nonebot_plugin_error_report.egg-info/top_level.txt
