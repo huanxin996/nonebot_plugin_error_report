@@ -58,7 +58,7 @@ pip install nonebot-plugin-error-manager
 
 ## 📸 效果展示
 
-<img src="https://raw.githubusercontent.com/huanxin996/nonebot-plugin-animepush/main/such.jpg" alt="示例图片">
+<img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/such.jpg" alt="示例图片">
 
 ## 🙏 鸣谢
 
