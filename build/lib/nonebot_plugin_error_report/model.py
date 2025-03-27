@@ -29,7 +29,7 @@ if error_config.use_orm_database:
     require("nonebot_plugin_tortoise_orm")
     from nonebot_plugin_tortoise_orm import add_model
     
-    add_model("qqzone.plugins.nonebot_plugin_error_report.model")
+    add_model("nonebot_plugin_error_report.model")
     
     class ErrorReport(Model):
         id = fields.IntField(pk=True)
