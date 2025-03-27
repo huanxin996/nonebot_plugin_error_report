@@ -1,5 +1,6 @@
 import json,os
 from datetime import datetime
+from nonebot import require
 from typing import Optional, List, Dict, Any, Set
 from pydantic import BaseModel
 from nonebot.log import logger
@@ -25,6 +26,7 @@ class ErrorReportBase(BaseModel):
 if error_config.use_orm_database:
     from tortoise import fields
     from tortoise.models import Model
+    require("nonebot_plugin_tortoise_orm")
     from nonebot_plugin_tortoise_orm import add_model
     
     add_model("qqzone.plugins.nonebot_plugin_error_report.model")
