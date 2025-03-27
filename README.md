@@ -65,6 +65,7 @@ nb plugin install nonebot_plugin_error_manager
 | smtp_user | str | "" | SMTP用户名 |
 | smtp_password | str | "" | SMTP密码或授权码 |
 | email_from | str | "" | 发件人邮箱 |
+| email_batch_size | int | 10 | 邮件发送批次大小 |
 | email_to | list[str] | [] | 收件人邮箱列表 |
 
 ### 定时报告配置
