@@ -1,4 +1,6 @@
 nonebot_plugin_alconna<=0.56.2
 nonebot_plugin_tortoise_orm<=0.1.4
 nonebot_plugin_userinfo<=0.2.6
+nonebot_plugin_apscheduler<=0.5.0
 pillow<=11.1.0
+aiosmtplib<=4.0.0

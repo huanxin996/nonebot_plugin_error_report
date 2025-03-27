@@ -3,6 +3,7 @@ README.md
 setup.py
 nonebot_plugin_error_report/__init__.py
 nonebot_plugin_error_report/config.py
+nonebot_plugin_error_report/email.py
 nonebot_plugin_error_report/model.py
 nonebot_plugin_error_report/toimg.py
 nonebot_plugin_error_report.egg-info/PKG-INFO

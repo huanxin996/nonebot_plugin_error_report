@@ -5,7 +5,7 @@ from nonebot.log import logger
 from math import cos, sin, pi
 from .config import error_config, BotRunTimeError
 
-def all_images_draw(error_msg:str,error_detail:str) -> Image.Image:
+def all_images_draw(plugin_name:str,error_msg:str,error_detail:str) -> Image.Image:
     card_width = 600  # 内部卡片宽度
     main_padding = 40  # 主卡片边距
     inner_padding = 15  # 内部元素边距
@@ -41,7 +41,7 @@ def all_images_draw(error_msg:str,error_detail:str) -> Image.Image:
     
     error_card_height = max(
         min_card_height,
-        35 + len(error_lines) * line_height + card_padding * 3
+        35 + len(error_lines) * line_height + line_height + card_padding * 3
     )
     detail_card_height = max(
         min_card_height,
@@ -65,7 +65,7 @@ def all_images_draw(error_msg:str,error_detail:str) -> Image.Image:
     current_y = draw_error_card(
         draw, error_lines, normal_font,
         current_y, start_x,
-        line_height, card_draw_width
+        line_height, card_draw_width,plugin_name
     )
     
     draw_traceback_card(
@@ -184,7 +184,7 @@ def draw_main_card(width: int, total_height: int, font: ImageFont.FreeTypeFont, 
     return img
 
 def draw_error_card(draw: ImageDraw, error_lines: list, font: ImageFont.FreeTypeFont, 
-                   start_y: int, start_x: int, line_height: int, width: int) -> int:
+                   start_y: int, start_x: int, line_height: int, width: int,plugin_name:str) -> int:
     """绘制错误信息卡片"""
     current_y = start_y
     card_bg = (48, 48, 52)
@@ -194,7 +194,7 @@ def draw_error_card(draw: ImageDraw, error_lines: list, font: ImageFont.FreeType
     
     padding = 20
     title_height = 30
-    content_height = title_height + 2 * line_height + padding * 2  # 固定两行文本
+    content_height = title_height + (2 + 1) * line_height + padding * 2
     card_height = max(100, content_height)
     
     shadow_offset = 4
@@ -221,12 +221,23 @@ def draw_error_card(draw: ImageDraw, error_lines: list, font: ImageFont.FreeType
         width=2
     )
     
+    title_text = "错误信息:"
     text_x = start_x + padding
     content_y = current_y + padding
-    draw.text((text_x, content_y), "错误信息:", font=font, fill=title_color)
-    content_y += line_height * 1.5
-    
+    draw.text((text_x, content_y), title_text, font=font, fill=title_color)
+    content_y += line_height * 1.2
     text_start_x = text_x + 10
+    if plugin_name:
+        plugin_text = f"插件: {plugin_name}"
+        draw.text(
+            (text_start_x, content_y), 
+            plugin_text, 
+            font=font, 
+            fill=text_color
+        )
+        content_y += line_height
+    
+    
     if error_lines:
         error_text = "".join(error_lines)
         split_text = error_text.split("&hx&")
