@@ -1,9 +1,41 @@
-import textwrap
+import textwrap,aiohttp,asyncio
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from nonebot.log import logger
 from math import cos, sin, pi
+from typing import Tuple, Optional
 from .config import error_config, BotRunTimeError
+
+
+async def update_plugin_version() -> Tuple[Optional[str], Optional[str]]:
+    fails = 0
+    url = "https://pypi.org/pypi/nonebot-plugin-error-report/json"
+    headers = {'content-type': 'application/json'}
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                if fails >= 10:
+                    logger.error("检查版本失败次数过多，已放弃")
+                    return None, None 
+                async with session.get(url, headers=headers, timeout=50) as response:
+                    if response.status == 200:
+                        json_data = await response.json()
+                        version = json_data["info"]["version"]
+                        update_time = json_data["releases"][version][0]["upload_time"]
+                        return version, update_time
+                    else:
+                        logger.warning(f"请求返回异常状态码: {response.status}")
+                        fails += 1
+                        continue
+            except asyncio.TimeoutError:
+                fails += 1
+                logger.warning("请求超时，正在重试...")
+            except Exception as e:
+                fails += 1
+                logger.warning(f"检查版本失败: {str(e)}，正在重试...")
+            await asyncio.sleep(1)
+
+version, update_time = asyncio.run(update_plugin_version())
 
 def all_images_draw(plugin_name:str,error_msg:str,error_detail:str) -> Image.Image:
     card_width = 600  # 内部卡片宽度
@@ -311,9 +343,9 @@ def draw_footer_info(draw: ImageDraw, font: ImageFont.FreeTypeFont,
     line_spacing = 25
     version_y = int(height - bottom_padding * 2.40)
     copyright_y = version_y + line_spacing
-    
+
     version_label = "Version: "
-    version_number = f"{error_config.version}"
+    version_number = f"{version}"
 
     label_width = draw.textlength(version_label, font=small_font)
     number_width = draw.textlength(version_number, font=small_font)
@@ -335,7 +367,7 @@ def draw_footer_info(draw: ImageDraw, font: ImageFont.FreeTypeFont,
         fill=version_color
     )
     
-    copyright_text = "nonebot_plugin_error_report © 2025 huanxin996 github"
+    copyright_text = f"nonebot_plugin_error_report © 2025 huanxin996 github -最后更新:{update_time}"
     copyright_width = draw.textlength(copyright_text, font=small_font)
     copyright_x = (width - copyright_width) // 2
     draw.text(

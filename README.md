@@ -35,26 +35,58 @@ _✨ 智能记录并可视化机器人运行时的错误信息 ✨_
 
 ## 💿 安装方式
 
+<details>
+<summary>使用 pip 安装</summary>
+
 ```bash
 pip install nonebot-plugin-error-manager
 ```
+
+这是最基础的安装方式，适用于所有 Python 环境。如果你使用的是虚拟环境，请确保在激活虚拟环境后再执行此命令。
+
+</details>
+
+<details>
+<summary>使用 nb-cli 安装</summary>
 
 ```bash
 nb plugin install nonebot_plugin_error_manager
 ```
 
+这是 NoneBot2 推荐的安装方式，它会自动处理依赖关系并在 `pyproject.toml` 中注册插件。
+
+</details>
+
+<details>
+<summary>从 GitHub 安装开发版</summary>
+
+```bash
+git clone https://github.com/huanxin996/nonebot-plugin-error-manager.git
+cd nonebot-plugin-error-manager
+pip install -e .
+```
+
+如果你需要最新的开发版本或想要参与开发，可以使用这种方式安装。
+
+</details>
+
 ## ⚙️ 配置说明
 
-### 基础配置
+<details>
+<summary>基础配置</summary>
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |-------|------|--------|-----|
 | error_image_quality | int | 30 | 错误图片渲染质量(1-100) |
 | error_image_font | str | None | 错误图片字体文件路径 |
-| enable_error_report | bool | True | 是否启用错误记录功能 |
+| enable_error_report | bool | True | 是否启用错误自动发送功能 |
+| enable_error_logs | bool | True | 是否启用错误日志记录功能 |
 | use_orm_database | bool | True | 是否使用数据库存储(False则使用JSON文件) |
 
-### 邮件通知配置
+</details>
+
+<details>
+<summary>邮件通知配置</summary>
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |-------|------|--------|-----|
@@ -68,24 +100,33 @@ nb plugin install nonebot_plugin_error_manager
 | email_batch_size | int | 10 | 邮件发送批次大小 |
 | email_to | list[str] | [] | 收件人邮箱列表 |
 
-### 定时报告配置
+</details>
+
+<details>
+<summary>定时报告配置</summary>
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |-------|------|--------|-----|
 | enable_scheduled_report | bool | False | 是否启用定时报告 |
 | report_mode | str | "count" | 触发模式: count(累计触发)/time(定时触发) |
 | report_count | int | 10 | 累计错误触发阈值(count模式) |
-| report_interval | str | "0 0 `*` `*` `*`" | 定时发送cron表达式(time模式) |
+| report_interval | str | "0 0 '_' '_' _" | 定时发送cron表达式(time模式) |
 | clear_after_report | bool | False | 发送后是否清空记录 |
 
-### 错误过滤配置
+</details>
+
+<details>
+<summary>错误过滤配置</summary>
 
 | 配置项 | 类型 | 默认值 | 说明 |
 |-------|------|--------|-----|
 | ignored_plugins | list[str] | [] | 忽略的插件列表 |
-| ignore_patterns | list[str] | [] | 忽略的错误模式 |
+| ignore_patterns | list[str] | [] | 忽略的错误模式(支持正则表达式) |
 
-### 配置示例
+</details>
+
+<details>
+<summary>配置示例</summary>
 
 ```python
 error_manager_config = {
@@ -109,6 +150,8 @@ error_manager_config = {
     "ignore_patterns": ["*timeout*", "*connection refused*"]
 }
 ```
+
+</details>
 
 ## 🎮 使用方法
 
@@ -145,43 +188,68 @@ except Exception as e:
 
 ## 📑 开发计划
 
-### 已完成功能
+<details>
+<summary>✅ 已完成功能</summary>
 
-- ✅ 邮件通知系统
-  - 支持定时发送错误报告
-  - 支持实时错误通知推送
-- ✅ 错误信息增强
-  - 优化依赖注入机制
-  - 扩展错误信息采集范围
-  - 优化发送错误信息的显示
-- ✅ 跨平台兼容性
-  - 支持主流聊天平台错误推送
-  - 统一错误处理接口
-- ✅ 报错处理增强
-  - 忽略指定插件的报错
-  - 忽略指定报错类型
+### 邮件通知系统
 
-### 进行中功能
+- 支持定时发送错误报告
+- 支持实时错误通知推送
 
-- 🚧 数据存储优化
-  - ORM数据库动态加载/卸载
-  - JSON文件导入导出支持
-  - 数据迁移工具开发
+### 错误信息增强
 
-### 计划中功能
+- 优化依赖注入机制
+- 扩展错误信息采集范围
+- 优化发送错误信息的显示
 
-- 📋 代码重构与优化
-  - 性能优化
-  - 代码结构重组
-  - 测试覆盖率提升
-  - 错误信息格式优化
-  - 尝试使用ai来处理错误信息
-  - 尝试自动化运维
-- 📋 平台适配扩展
-  - 新增平台支持
-  - 统一适配器接口
+### 跨平台兼容性
+
+- 支持主流聊天平台错误推送
+- 统一错误处理接口
+
+### 报错处理增强
+
+- 忽略指定插件的报错
+- 忽略指定报错类型
+
+</details>
+
+<details>
+<summary>🚧 进行中功能</summary>
+
+### 数据存储优化
+
+- ORM数据库动态加载/卸载
+- JSON文件导入导出支持
+- 数据迁移工具开发
+
+</details>
+
+<details>
+<summary>📋 计划中功能</summary>
+
+### 代码重构与优化
+
+- 性能优化
+- 代码结构重组
+- 测试覆盖率提升
+- 错误信息格式优化
+- 尝试使用ai来处理错误信息
+- 尝试自动化运维
+
+### 平台适配扩展
+
+- 新增平台支持
+- 统一适配器接口
+
+</details>
 
 ## 📸 效果展示
+
+<details>
+<summary>📸图片</summary>
+
+这里是一些示例示例图片
 
 <img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/example_image/test0.png" alt="示例图片-1">
 <img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/example_image/test1.jpg" alt="示例图片-2">
@@ -191,6 +259,8 @@ except Exception as e:
 <img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/example_image/test5.jpg" alt="示例图片-6">
 <img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/example_image/test6.jpg" alt="示例图片-7">
 <img src="https://raw.githubusercontent.com/huanxin996/nonebot_plugin_error_report/main/example_image/test7.jpg" alt="示例图片-8">
+
+</details>
 
 ## 🙏 鸣谢
 

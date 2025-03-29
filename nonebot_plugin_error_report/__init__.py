@@ -1,5 +1,5 @@
 import traceback,datetime,sys
-from nonebot.plugin import PluginMetadata
+from nonebot.plugin import PluginMetadata,inherit_supported_adapters
 from nonebot.adapters import Event
 from nonebot.matcher import Matcher
 from nonebot import require
@@ -17,21 +17,30 @@ from nonebot.log import logger
 
 
 __plugin_meta__ = PluginMetadata(
-    name="nonebot_plugin_error_report",
-    description="幻歆",
+    name="报错处理器",
+    description="基于NoneBot2的错误处理插件，支持图片/文字发送、数据库存储及跨平台",
     usage=(
-        "报错处理\n",
-        "绘制为图片并发送,绘制失败自动切换为文字发送\n",
-        "支持将报错信息存入数据库内，支持查看\n",
-        "伪全平台支持⭐\n"
-        "使用nonebot-plugin-userinfo获取用户信息\n"
-        "使用nonebot_plugin_alconna发送信息\n"
-        "鸣谢以上插件作者以及nonebot"
+        "功能介绍：\n"
+        "- 自动捕获Bot运行时的错误\n"
+        "- 支持图片/文字两种展示方式\n"
+        "- 错误信息自动存储到数据库\n"
+        "- 支持多平台机器人⭐\n"
+        "- 支持定时/阈值邮件通知\n\n"
+        "命令使用：\n"
+        "- 错误管理 查看 [页数]\n"
+        "- 错误管理 搜索 [关键词]\n"
+        "- 错误管理 详情 [ID]\n"
+        "- 错误管理 删除 [ID]\n"
+        "- 错误管理 统计\n"
+        "- 错误管理 清空 [类型] [值]\n\n"
+        "技术支持：\n"
+        "基于 nonebot-plugin-userinfo 和 nonebot-plugin-alconna\n"
+        "感谢以上插件作者以及 NoneBot2 团队"
     ),
     type="application",
     homepage="https://github.com/huanxin996/nonebot_plugin_error_report",
     config=Config,
-    supported_adapters=None,
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
 )
 
 error_cache = ErrorCache()
@@ -210,34 +219,44 @@ async def handle_error_management(result: Arparma, target: MsgTarget,user_info: 
 async def post_run(matcher:Matcher,event: Event, e: Exception, target: MsgTarget, bot_info: UserInfo = BotUserInfo(), user_info: UserInfo = EventUserInfo()) -> None:
     plugin_name = matcher.plugin.name
     error_type = type(e).__name__
+    if hasattr(e, "__traceback__"):
+        tb_list = traceback.format_exception(type(e), e, e.__traceback__)
+        error_detail = "".join(tb_list)
+    else:
+        error_detail = "\n".join(e.args)
     logger.debug(f"插件：【{matcher.plugin.name}】 运行时错误: {str(e)}")
+    if error_config.enable_error_logs:
+        await update_or_create(
+                user_id=user_info.user_id,
+                bot_id=bot_info.user_id,
+                session_id=event.get_session_id(),
+                message=event.get_message(),
+                error_type=error_type,
+                error_msg=e,
+                error_detail=error_detail,
+                plugin_name=plugin_name,
+                time=datetime.datetime.now()
+            )
+    if not error_config.enable_error_report:
+        logger.warning("错误报告功能未启用,")
+        return
     if plugin_name in error_config.ignored_plugins or error_type in error_config.ignore_patterns:
         logger.debug(f"因为插件【{plugin_name}】在忽略列表中，所以不进行处理" if plugin_name in error_config.ignored_plugins else f"因为错误类型【{error_type}】在忽略列表中，所以不进行处理")
         return
     try:
-        if hasattr(e, "__traceback__"):
-            tb_list = traceback.format_exception(type(e), e, e.__traceback__)
-            error_detail = "".join(tb_list)
-        else:
-            error_detail = "\n".join(e.args)
         img = await error_to_images(plugin_name,err_values=e)
     except BotRunTimeError:
         logger.warning(f"生成 [{plugin_name}]:{error_type} 错误报告图片失败，将使用文字方式发送")
         img = None
     try:
-        await update_or_create(
-            user_id=user_info.user_id,
-            bot_id=bot_info.user_id,
-            session_id=event.get_session_id(),
-            message=event.get_message(),
-            error_type=error_type,
-            error_msg=e,
-            error_detail=error_detail,
-            plugin_name=plugin_name,
-            time=datetime.datetime.now()
-        )
         if img:
-            await UniMessage.image(raw=img).send(target=target)
+            try:
+                await UniMessage.image(raw=img).send(target=target)
+            except Exception as e0:
+                logger.error(f"发送错误报告图片失败: {str(e0)},将使用文字方式发送")
+                error_msg = str(e)[:50] + "..." if len(str(e)) > 50 else str(e)
+                result = f"抱歉，我出现了一点问题，请尝试使用其他指令，或者联系开发者\n以下是错误信息:\n{error_msg}"
+                await UniMessage.text(result).send(target=target)
         else:
             error_msg = str(e)[:50] + "..." if len(str(e)) > 50 else str(e)
             result = f"抱歉，我出现了一点问题，请尝试使用其他指令，或者联系开发者\n以下是错误信息:\n{error_msg}"

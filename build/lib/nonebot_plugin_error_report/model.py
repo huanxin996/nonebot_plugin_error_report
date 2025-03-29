@@ -1,6 +1,5 @@
 import json,os
 from datetime import datetime
-from nonebot import require
 from typing import Optional, List, Dict, Any, Set
 from pydantic import BaseModel
 from nonebot.log import logger
@@ -24,6 +23,7 @@ class ErrorReportBase(BaseModel):
         }
 
 if error_config.use_orm_database:
+    from nonebot import require
     from tortoise import fields
     from tortoise.models import Model
     require("nonebot_plugin_tortoise_orm")
@@ -44,10 +44,11 @@ if error_config.use_orm_database:
         time = fields.DatetimeField()
 
 else:
-    class ErrorReport:
-        _file_path = "error_reports.json"
+    class JsonModel:
+        _file_path: str
         _data: List[Dict[str, Any]] = []
-        _counter = 0
+        _counter: int = 0
+        _fields: Dict[str, Any] = {}
 
         @classmethod
         def load_data(cls) -> None:
@@ -56,34 +57,77 @@ else:
                     with open(cls._file_path, "r", encoding="utf-8") as f:
                         cls._data = json.load(f)
                         if cls._data:
-                            cls._counter = max(x["id"] for x in cls._data)
+                            cls._counter = max(x.get("id", 0) for x in cls._data)
                 except Exception as e:
-                    logger.error(f"加载错误记录文件失败: {e}")
+                    logger.error(f"加载JSON文件失败: {e}")
                     cls._data = []
 
         @classmethod
         def save_data(cls) -> None:
             try:
                 with open(cls._file_path, "w", encoding="utf-8") as f:
-                    json.dump(cls._data, f, ensure_ascii=False, indent=2, 
-                             default=lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if isinstance(x, datetime) else str(x))
+                    json.dump(cls._data, f, ensure_ascii=False, indent=2,
+                            default=lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if isinstance(x, datetime) else str(x))
             except Exception as e:
-                logger.error(f"保存错误记录文件失败: {e}")
+                logger.error(f"保存JSON文件失败: {e}")
+
+    class ErrorReport(JsonModel):
+        """错误报告模型"""
+        _file_path = "error_reports.json"
+        _fields = {
+            "id": {"type": int, "primary_key": True},
+            "user_id": {"type": str, "max_length": 64},
+            "bot_id": {"type": str, "max_length": 64},
+            "session_id": {"type": str, "max_length": 64},
+            "message": {"type": str},
+            "error_type": {"type": str, "max_length": 64},
+            "error_msg": {"type": str},
+            "error_detail": {"type": str, "null": True},
+            "plugin_name": {"type": str, "max_length": 64},
+            "time": {"type": datetime}
+        }
+
+        def __init__(self, **kwargs):
+            for field, config in self._fields.items():
+                if field in kwargs:
+                    value = kwargs[field]
+                    field_type = config["type"]
+                    if field_type == datetime and isinstance(value, str):
+                        try:
+                            kwargs[field] = datetime.fromisoformat(value.replace(" ", "T"))
+                        except ValueError:
+                            kwargs[field] = datetime.now()
+                    if field_type == str and "max_length" in config:
+                        max_length = config["max_length"]
+                        if len(str(value)) > max_length:
+                            kwargs[field] = str(value)[:max_length]
+            for k, v in kwargs.items():
+                setattr(self, k, v)
 
         @classmethod
         async def create(cls, **kwargs) -> "ErrorReport":
+            """创建新记录"""
             cls.load_data()
             cls._counter += 1
-            error_dict = {
-                "id": cls._counter,
-                **kwargs
-            }
+            if "time" not in kwargs:
+                kwargs["time"] = datetime.now()
+            if "id" not in kwargs:
+                cls._counter += 1
+                kwargs["id"] = cls._counter
+            else:
+                if kwargs["id"] > cls._counter:
+                    cls._counter = kwargs["id"]
+            error_dict = kwargs.copy()
+            for field, config in cls._fields.items():
+                if field not in error_dict and not config.get("null", False):
+                    error_dict[field] = "" if config["type"] == str else None
             cls._data.append(error_dict)
             cls.save_data()
             return cls(**error_dict)
 
         @classmethod
         async def filter(cls, **kwargs) -> List["ErrorReport"]:
+            """过滤查询"""
             cls.load_data()
             results = []
             for item in cls._data:
@@ -91,6 +135,8 @@ else:
                 for k, v in kwargs.items():
                     if k.endswith("__lt"):
                         field = k[:-4]
+                        if field == "time" and isinstance(v, str):
+                            v = datetime.fromisoformat(v.replace(" ", "T"))
                         if not (field in item and item[field] < v):
                             match = False
                             break
@@ -107,13 +153,47 @@ else:
             return results
 
         @classmethod
+        async def delete(cls, **kwargs) -> int:
+            """删除符合条件的记录，返回删除的记录数"""
+            cls.load_data()
+            original_length = len(cls._data)
+            deleted_ids = []
+            new_data = []
+            for item in cls._data:
+                should_keep = True
+                for k, v in kwargs.items():
+                    if k.endswith("__lt"):
+                        field = k[:-4]
+                        if field == "time" and isinstance(v, str):
+                            v = datetime.fromisoformat(v.replace(" ", "T"))
+                        if field in item and item[field] < v:
+                            should_keep = False
+                            break
+                    elif not (k in item and item[k] == v):
+                        should_keep = False
+                        break
+                if should_keep:
+                    new_data.append(item)
+                else:
+                    deleted_ids.append(item.get("id"))
+            if len(new_data) != original_length:
+                cls._data = new_data
+                cls.save_data()
+                logger.info(f"已删除 {original_length - len(new_data)} 条记录，ID: {deleted_ids}")
+
+            return original_length - len(new_data)
+
+        @classmethod
         async def all(cls) -> List["ErrorReport"]:
+            """获取所有记录"""
             cls.load_data()
             return [cls(**item) for item in cls._data]
 
-        def __init__(self, **kwargs):
-            for k, v in kwargs.items():
-                setattr(self, k, v)
+        @classmethod
+        async def count(cls) -> int:
+            """获取记录总数"""
+            cls.load_data()
+            return len(cls._data)
 
 class ErrorCache:
     def __init__(self):

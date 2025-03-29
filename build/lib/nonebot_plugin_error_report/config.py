@@ -6,13 +6,13 @@ from nonebot import get_plugin_config
 
 
 class Config(BaseModel):
-    version: str = "0.0.2"
     # 错误报告配置
     error_image_quality: int = Field(default=30, ge=1, le=100, description="报错图片渲染质量(1-100)")
     error_image_font: str = Field(default=None, description="报错图片字体文件路径")
 
     # 错误记录配置
-    enable_error_report: bool = Field(default=True, description="是否启用错误记录功能")
+    enable_error_report: bool = Field(default=True, description="是否启用错误自动发送功能")
+    enable_error_logs: bool = Field(default=True, description="是否启用错误记录功能")
     use_orm_database: bool = Field(default=True, description="是否启用数据库存储错误记录,默认启用，不启用则将使用json文件存储错误信息")
     
     # 邮件配置
