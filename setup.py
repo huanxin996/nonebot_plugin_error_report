@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="nonebot_plugin_error_report",
-    version="0.0.9",
+    version="0.0.10",
     author="huanxin996",
     author_email="mc.xiaolang@foxmail.com",
     description="基于nonebot的报错处理插件，支持图片/文字发送、数据库存储及跨平台",
