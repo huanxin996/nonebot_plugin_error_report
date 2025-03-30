@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="nonebot_plugin_error_report",
-    version="0.0.10",
+    version="0.1.0",
     author="huanxin996",
     author_email="mc.xiaolang@foxmail.com",
     description="基于nonebot的报错处理插件，支持图片/文字发送、数据库存储及跨平台",
@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/huanxin996/nonebot_plugin_error_report",
     packages=setuptools.find_packages(),
     install_requires=[
-        'nonebot2>=2.0.0,<3.0.0',
+        'nonebot2>=2.3.0,<3.0.0',
         'nonebot_plugin_alconna>=0.54.0',
         'nonebot_plugin_tortoise_orm>=0.1.0,<0.2.0',
         'nonebot_plugin_userinfo>=0.2.0,<0.3.0',

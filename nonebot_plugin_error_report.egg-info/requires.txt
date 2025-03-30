@@ -1,4 +1,4 @@
-nonebot2<3.0.0,>=2.0.0
+nonebot2<3.0.0,>=2.3.0
 nonebot_plugin_alconna>=0.54.0
 nonebot_plugin_tortoise_orm<0.2.0,>=0.1.0
 nonebot_plugin_userinfo<0.3.0,>=0.2.0
