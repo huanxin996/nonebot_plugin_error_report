@@ -14,8 +14,8 @@ _✨ 智能记录并可视化机器人运行时的错误信息 ✨_
   <a href="https://github.com/huanxin996/nonebot_plugin_error_report/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/huanxin996/nonebot_plugin_error_report.svg" alt="license">
   </a>
-  <a href="https://pypi.python.org/pypi/nonebot-plugin-error-manager">
-    <img src="https://img.shields.io/pypi/v/nonebot-plugin-error-manager" alt="pypi">
+  <a href="https://pypi.python.org/pypi/nonebot-plugin-error-report">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-error-report" alt="pypi">
   </a>
   <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
   <a href="https://github.com/huanxin996/nonebot_plugin_error_report/releases">
